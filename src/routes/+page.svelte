@@ -1,29 +1,60 @@
 <script lang="ts">
-	let email: string = '';
-	let emailSubmitted: boolean = false;
+  import { onMount } from 'svelte';
 
-	function submitEmail(): void {
-		if (email) {
-			emailSubmitted = true;
-		}
+  let email: string = '';
+  let emailSubmitted: boolean = false; // Fallback value
+  let voted: Record<string, boolean> = {
+    fruit: false,
+    drink: false,
+    animal: false
+  }; 
+
+  onMount(() => {
+  	const storedEmail = localStorage.getItem('submittedEmail');
+  	if (storedEmail) {
+    	email = storedEmail;
+  	}
+
+    emailSubmitted = localStorage.getItem('emailSubmitted') === 'true';
+    voted = {
+      fruit: localStorage.getItem('fruit') === 'true',
+      drink: localStorage.getItem('drink') === 'true',
+      animal: localStorage.getItem('animal') === 'true'
+    };
+  });
+
+  function submitEmail(): void {
+    if (email) {
+      emailSubmitted = true;
+      localStorage.setItem('emailSubmitted', 'true');
+      localStorage.setItem('submittedEmail', email);
+    }
+  }
+
+  const categories: Record<string, string[]> = {
+    fruit: ['🍎', '🍌', '🍇', '🍓', '🍍'],
+    drink: ['🍹', '🍺', '🍵', '☕', '🍼'],
+    animal: ['🐶', '🐱', '🐭', '🐹', '🐰']
+  };
+
+  function vote(category: string): void {
+    voted[category] = true;
+    localStorage.setItem(category, 'true');
+  }
+
+  function clearLocalStorage(): void {
+	  localStorage.removeItem('emailSubmitted');
+	  localStorage.removeItem('submittedEmail');
+	  localStorage.removeItem('fruit');
+	  localStorage.removeItem('drink');
+	  localStorage.removeItem('animal');
+	  emailSubmitted = false;
+	  email = '';
+	  voted = { fruit: false, drink: false, animal: false };
 	}
 
-	const categories: Record<string, string[]> = {
-		fruit: ['🍎', '🍌', '🍇', '🍓', '🍍'],
-		drink: ['🍹', '🍺', '🍵', '☕', '🍼'],
-		animal: ['🐶', '🐱', '🐭', '🐹', '🐰']
-	};
-
-	let voted: Record<string, boolean> = {
-		fruit: false,
-		drink: false,
-		animal: false
-	};
-
-	function vote(category: string): void {
-		voted[category] = true;
-	}
 </script>
+
 
 <style>
   .container {
@@ -37,7 +68,7 @@
   .email-input, .submit-button {
     padding: 10px 20px;
     margin: 5px;
-    border: 1px solid #ccc;
+    border:  1px solid #555;
     border-radius: 15px;
     font-size: 16px;
     background-color: white;
@@ -45,7 +76,12 @@
   }
 
   .email-input {
-    width: 200px; /* Adjust as needed */
+    width: 200px; 
+  }
+
+  .email-input:disabled, .submit-button:disabled {
+    background-color: #e3e1e1; 
+    cursor: default; 
   }
 
   .category {
@@ -68,9 +104,9 @@
 	}
 
   .category button:disabled {
-    color: grey;
-    border-color: grey;
-    background-color: #f0f0f0;
+    color: #555;
+    border-color: #555;
+    background-color: #e3e1e1;
     cursor: default;
   }
 
@@ -78,21 +114,30 @@
     color: black;
     border-color: black;
   }
+
+  .blur {
+    filter: blur(2px); 
+  }
 </style>
 
 
 <div class="container">
-	<input 
-		class="email-input"
-		type="email" 
-		bind:value={email}
-		placeholder="Enter your email" 
-	/>
-	<button on:click={submitEmail}>Submit</button>
+  <input 
+    class="email-input"
+    type="email" 
+    bind:value={email}
+    placeholder="Enter your email"
+    disabled={emailSubmitted} />
+  <button 
+    class="submit-button"
+    on:click={submitEmail}
+    disabled={emailSubmitted}>
+    Submit
+  </button>
 
 		{#each Object.entries(categories) as [category, options]}
-		<div class="category" >
-			<h3>{category}</h3>
+		<div class="category {emailSubmitted ? '' : 'blur'}" >
+			<h3>{category[0].toUpperCase() + category.slice(1)}</h3>
 			{#each options as option}
 				<button 
 					disabled={!emailSubmitted || voted[category]}
@@ -103,6 +148,8 @@
 			{/each}
 		</div>
 	{/each}
+
+<a href="javascript:void(0)" on:click={clearLocalStorage}>Clear all data</a>
 
 </div>
 
