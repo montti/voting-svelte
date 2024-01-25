@@ -1,8 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
 
-  let email: string = '';
-  let emailSubmitted: boolean = false; // Fallback value
+	let email: string = '';
+	let emailInput: HTMLInputElement;
+	let emailSubmitted: boolean = false;
+	$: isEmailValid = emailInput && email ? emailInput.validity.valid : true;
+
   let voted: Record<string, boolean> = {
     fruit: false,
     drink: false,
@@ -162,21 +165,26 @@
 	  cursor: pointer;
 	}
 
+	.invalid {
+    border-color: red; /* Red border for invalid input */
+    background-color: #ffcccc; /* Light red background for invalid input */
+  }
 </style>
 
 
 <div class="container">
-  <input 
-    class="email-input"
-    type="email" 
-    bind:value={email}
-    placeholder="Enter your email"
-    disabled={emailSubmitted} />
+	<input 
+	  class="email-input {email && !emailInput.validity.valid ? 'invalid' : ''}"
+	  type="email"
+	  bind:value={email}
+	  bind:this={emailInput}
+	  placeholder="Enter your email"
+	  disabled={emailSubmitted} />
   <button 
     class="submit-button"
     on:click={submitEmail}
-    disabled={emailSubmitted}>
-    Submit
+    disabled={emailSubmitted || !isEmailValid}>
+    Submit 
   </button>
 
 		{#each Object.entries(categories) as [category, options]}
