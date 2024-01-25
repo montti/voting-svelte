@@ -32,9 +32,9 @@
   }
 
   const categories: Record<string, string[]> = {
-    fruit: ['🍎', '🍌', '🍇', '🍓', '🍍'],
-    drink: ['🍹', '🍺', '🍵', '☕', '🍼'],
-    animal: ['🐶', '🐱', '🐭', '🐹', '🐰']
+	  fruit: ['🍎', '🍌', '🍇', '🍓', '🍍', '🥭', '🍑', '🍒'],
+	  drink: ['🍹', '🍺', '🍵', '☕', '🥤', '🍸', '🍷', '🥛'],
+	  animal: ['🐶', '🐱', '🐭', '🐰', '🐻', '🦁', '🐨', '🐼']
   };
 
   function vote(category: string): void {
@@ -52,6 +52,12 @@
 	  email = '';
 	  voted = { fruit: false, drink: false, animal: false };
 	}
+
+	let showModal = false;
+
+  $: {
+    showModal = Object.values(voted).every(v => v);
+  }
 
 </script>
 
@@ -118,6 +124,44 @@
   .blur {
     filter: blur(2px); 
   }
+
+	.modal {
+	  position: fixed;
+	  z-index: 1;
+	  left: 0;
+	  top: 0;
+	  width: 100%;
+	  height: 100%;
+	  overflow: auto;
+	  background-color: rgb(0,0,0); /* Fallback color */
+	  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	}
+
+	.modal-content {
+	  background-color: #fefefe;
+	  margin: 15% auto;
+	  padding: 20px;
+	  border: 2px solid black;
+	  border-radius: 15px;
+	  width: 80%;
+	  border-radius: 15px;
+
+	}
+
+	.close {
+	  color: #aaa;
+	  float: right;
+	  font-size: 28px;
+	  font-weight: bold;
+	}
+
+	.close:hover,
+	.close:focus {
+	  color: black;
+	  text-decoration: none;
+	  cursor: pointer;
+	}
+
 </style>
 
 
@@ -148,6 +192,17 @@
 			{/each}
 		</div>
 	{/each}
+
+{#if showModal}
+  <div class="modal">
+    <div class="modal-content">
+      <span class="close" on:click={() => showModal = false}>&times;</span>
+      <p>All categories have been voted on!</p>
+      <a href="javascript:void(0)" on:click={clearLocalStorage}>Clear all data</a>
+    </div>
+  </div>
+{/if}
+
 
 <a href="javascript:void(0)" on:click={clearLocalStorage}>Clear all data</a>
 
