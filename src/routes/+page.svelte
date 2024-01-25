@@ -93,7 +93,7 @@
     margin: 5px;
     border: 1px solid #ccc;
     border-radius: 15px;
-    font-size: 48px;
+    font-size: 36px;
     background-color: white;
     cursor: pointer;
     transition: all 0.2s ease;
